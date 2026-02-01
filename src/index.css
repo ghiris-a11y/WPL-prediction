@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom mobile-first styles */
+@layer base {
+  html {
+    @apply antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    @apply bg-slate-50 text-slate-900;
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  /* Card styles */
+  .ai-card {
+    @apply bg-white rounded-2xl shadow-lg border border-slate-200;
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent;
+  }
+  
+  /* Tab active state */
+  .tab-active {
+    @apply bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md;
+  }
+  
+  /* Touch-friendly buttons */
+  .btn-primary {
+    @apply px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all;
+    min-height: 44px;
+  }
+  
+  /* Mobile-optimized table */
+  .mobile-table {
+    @apply w-full overflow-x-auto;
+  }
+  
+  .mobile-table table {
+    @apply min-w-full divide-y divide-slate-200;
+  }
+  
+  .mobile-table th {
+    @apply px-3 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider bg-slate-50;
+  }
+  
+  .mobile-table td {
+    @apply px-3 py-4 text-sm text-slate-900;
+  }
+}
+
+@layer utilities {
+  /* Safe area for mobile notches */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Touch-friendly spacing */
+  .touch-spacing {
+    @apply p-4;
+  }
+  
+  @media (min-width: 768px) {
+    .touch-spacing {
+      @apply p-6;
+    }
+  }
+  
+  /* Prevent text selection on interactive elements */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Smooth scrolling for mobile */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Loading animations */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Mobile-specific overrides */
+@media (max-width: 768px) {
+  /* Larger touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing */
+  .container {
+    @apply px-4;
+  }
+  
+  /* Optimize font sizes for mobile */
+  h1 {
+    @apply text-xl;
+  }
+  
+  h2 {
+    @apply text-lg;
+  }
+  
+  h3 {
+    @apply text-base;
+  }
+  
+  /* Stack elements vertically */
+  .mobile-stack {
+    @apply flex-col;
+  }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  /* Uncomment to enable dark mode */
+  /*
+  body {
+    @apply bg-slate-900 text-slate-100;
+  }
+  
+  .ai-card {
+    @apply bg-slate-800 border-slate-700;
+  }
+  */
+}
