@@ -5,7 +5,7 @@ import { fetchLiveWPLData } from './services/cricketService';
 import { simulateTournament, calculateVolatility } from './predictionEngine';
 
 // ✅ FIXED IMPORTS: Removed space in path, using Named Imports
-import Bracket from './components/Bracket'; 
+import { Bracket } from './components/Bracket'; 
 import StandingsTable from './components/StandingsTable';
 import LiveMatchTracker from './components/LiveMatchTracker';
 import PredictionPanel from './components/PredictionPanel';
