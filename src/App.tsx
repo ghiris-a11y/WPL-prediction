@@ -3,12 +3,12 @@ import { TeamName, TeamStats, Match, TournamentState } from './types';
 import { INITIAL_TEAMS, INITIAL_MATCHES } from './constants';
 import { fetchLiveWPLData } from './services/cricketService';
 import { simulateTournament, calculateVolatility } from './predictionEngine';
-import Bracket from './ components/Bracket.tsx';
-import StandingsTable from './ components/StandingsTable.tsx';
-import LiveMatchTracker from './ components/LiveMatchTracker.tsx';
-import PredictionPanel from './ components/PredictionPanel.tsx';
-import ScheduleList from './ components/ScheduleList.tsx';
-import AccuracyTracker from './ components/AccuracyTracker.tsx';
+import Bracket from './components/Bracket';
+import StandingsTable from './components/StandingsTable';
+import LiveMatchTracker from './components/LiveMatchTracker';
+import PredictionPanel from './components/PredictionPanel';
+import ScheduleList from './components/ScheduleList';
+import AccuracyTracker from './components/AccuracyTracker';
 
 const CACHE_KEY = 'wpl_oracle_data_v3';
 const SYNC_INTERVAL = 30000; // 30 seconds for faster updates
