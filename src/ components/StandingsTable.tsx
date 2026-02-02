@@ -1,78 +1,88 @@
-
 import React from 'react';
 import { TeamStats } from '../types';
-import { TEAM_LOGOS } from '../constants';
 
-const StandingsTable: React.FC<{ teams: TeamStats[] }> = ({ teams }) => {
-  const sortedTeams = [...teams].sort((a, b) => b.points - a.points || b.nrr - a.nrr);
+interface StandingsTableProps {
+  teams: TeamStats[];
+}
+
+const StandingsTable: React.FC<StandingsTableProps> = ({ teams }) => {
+  // Sort teams by points (descending), then by NRR
+  const sortedTeams = [...teams].sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    return b.nrr - a.nrr;
+  });
 
   return (
-    <div className="ai-card rounded-3xl overflow-hidden border border-white/60 shadow-xl">
-      <div className="p-5 md:p-6 border-b border-slate-100 bg-white/30 flex justify-between items-center">
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-3">
-          <i className="fas fa-trophy text-indigo-600"></i> Season 4 Standings
-        </h3>
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
-           <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-           <span className="text-[9px] font-black text-emerald-600 uppercase">Live</span>
-        </div>
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+      <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+        <h2 className="text-xl font-bold text-white">Points Table</h2>
       </div>
-      <div className="overflow-x-auto scrollbar-hide">
-        <table className="w-full text-left min-w-[500px]">
-          <thead className="bg-slate-50/50">
+      
+      <div className="overflow-x-auto">
+        <table className="min-w-full">
+          <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase">Pos</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase">Team</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase text-center">P</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase text-center">NRR</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase text-center">Pts</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase text-center">Form</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Pos</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Team</th>
+              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">P</th>
+              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">W</th>
+              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">L</th>
+              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">NRR</th>
+              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Pts</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {sortedTeams.map((team, idx) => (
-              <tr key={team.name} className="hover:bg-indigo-50/30 transition-all group">
-                <td className="px-6 py-5 whitespace-nowrap">
-                   <span className="text-sm font-black mono-tech text-slate-300 group-hover:text-indigo-400 transition-colors">#{idx + 1}</span>
-                </td>
-                <td className="px-6 py-5 whitespace-nowrap">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center border border-slate-100 shadow-sm">
-                      <img src={TEAM_LOGOS[team.name]} alt={team.name} className="w-7 h-7 object-contain" />
+          <tbody className="bg-white divide-y divide-slate-100">
+            {sortedTeams.map((team, index) => {
+              const isQualified = index < 4; // Top 4 teams qualify
+              
+              return (
+                <tr 
+                  key={team.name} 
+                  className={`hover:bg-purple-50 transition ${
+                    isQualified ? 'bg-green-50/50' : ''
+                  }`}
+                >
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        isQualified ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-700'
+                      }`}>
+                        {index + 1}
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-xs font-black text-slate-700 block tracking-tight">{team.name}</span>
-                      <span className="text-[8px] mono-tech text-slate-400">ELO: {team.elo}</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-5 whitespace-nowrap text-center text-xs font-bold text-slate-500">{team.played}</td>
-                <td className="px-6 py-5 whitespace-nowrap text-center text-[10px] font-black mono-tech">
-                   <span className={team.nrr >= 0 ? 'text-emerald-500' : 'text-rose-500'}>
-                     {team.nrr > 0 ? '+' : ''}{team.nrr.toFixed(3)}
-                   </span>
-                </td>
-                <td className="px-6 py-5 whitespace-nowrap text-center">
-                   <span className="text-base font-black text-indigo-600 mono-tech">{team.points}</span>
-                </td>
-                <td className="px-6 py-5 whitespace-nowrap">
-                  <div className="flex justify-center gap-1">
-                    {team.recentForm.slice(-3).map((res, i) => (
-                      <div 
-                        key={i} 
-                        className={`w-4 h-4 rounded flex items-center justify-center text-[7px] font-bold ${
-                          res === 'W' ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'
-                        }`}
-                      >
-                        {res}
-                      </div>
-                    ))}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="text-sm font-semibold text-slate-900">{team.name}</div>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-slate-700">
+                    {team.played}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-semibold text-green-600">
+                    {team.won}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-semibold text-red-600">
+                    {team.lost}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-mono">
+                    <span className={team.nrr >= 0 ? 'text-green-600' : 'text-red-600'}>
+                      {team.nrr >= 0 ? '+' : ''}{team.nrr.toFixed(3)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                    <span className="text-sm font-bold text-purple-600">{team.points}</span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+      </div>
+      
+      <div className="bg-slate-50 px-4 py-3 text-xs text-slate-600 border-t border-slate-200">
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-3 h-3 bg-green-50 border-2 border-green-500 rounded"></span>
+          <span>Qualified for playoffs (Top 4)</span>
+        </div>
       </div>
     </div>
   );
