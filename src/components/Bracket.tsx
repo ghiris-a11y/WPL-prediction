@@ -212,3 +212,4 @@ const Bracket: React.FC<BracketProps> = ({ matches, onSelectWinner }) => {
     </div>
   );
 };
+export default Bracket;
