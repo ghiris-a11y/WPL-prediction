@@ -14,6 +14,12 @@ const CACHE_KEY = 'wpl_oracle_data_v3';
 const SYNC_INTERVAL = 30000; // 30 seconds for faster updates
 const COOLDOWN_PERIOD = 5000;
 
+        <Routes>
+          <Route path="/" element={<Index />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+
 const App: React.FC = () => {
   const [state, setState] = useState<TournamentState>(() => {
     const cached = localStorage.getItem(CACHE_KEY);
