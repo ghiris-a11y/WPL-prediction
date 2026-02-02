@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. */
 @layer base {
   :root {
     --background: 220 20% 97%;
@@ -25,7 +24,7 @@
     --input: 220 13% 91%;
     --ring: 262 83% 58%;
     --radius: 0.5rem;
-    
+
     /* Custom WPL Colors */
     --wpl-gradient-start: 262 83% 58%;
     --wpl-gradient-end: 290 80% 55%;
@@ -33,19 +32,19 @@
     --wpl-warning: 38 92% 50%;
     --wpl-live: 0 84% 60%;
     --wpl-gold: 45 93% 47%;
-    
+
     /* Team Colors */
     --team-rcb: 0 84% 47%;
     --team-mi: 214 80% 35%;
     --team-dc: 207 82% 35%;
     --team-gg: 24 90% 54%;
     --team-upw: 282 65% 43%;
-    
+
     /* Shadows & Effects */
     --shadow-glow: 0 0 40px hsl(262 83% 58% / 0.25);
     --shadow-card: 0 4px 24px hsl(224 71% 4% / 0.08);
     --shadow-hover: 0 8px 32px hsl(224 71% 4% / 0.12);
-    
+
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5% 26%;
@@ -211,7 +210,7 @@
     50% { transform: translateY(-10px); }
   }
   
-  /* Gradient border - FIXED HERE */
+  /* Gradient border */
   .gradient-border {
     @apply relative;
     background: linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box, linear-gradient(135deg, hsl(var(--wpl-gradient-start)), hsl(var(--wpl-gradient-end))) border-box;
