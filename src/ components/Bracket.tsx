@@ -1,148 +1,214 @@
-
 import React from 'react';
-import { Match, TeamName } from '../types';
-import { TEAM_LOGOS } from '../constants';
-
+import { Match, TeamName } from '@/types';
+import { TEAM_LOGOS, TEAM_COLORS } from '@/constants';
+import { cn } from '@/lib/utils';
+import { Trophy, TrendingUp, Zap, Star } from 'lucide-react';
 interface BracketProps {
   matches: Match[];
-  onSelectWinner: (id: string, winner: TeamName) => void;
+  onSelectWinner?: (matchId: string, winner: TeamName) => void;
 }
-
-const MatchNode: React.FC<{ match: Match }> = ({ match }) => {
-  return (
-    <div className={`relative w-[260px] md:w-[280px] p-5 md:p-6 rounded-3xl ai-card border transition-all duration-300 ${
-      match.status === 'Live' ? 'border-indigo-400 ring-4 ring-indigo-500/5 shadow-indigo-100' : 'border-white/60'
-    }`}>
-      <div className="flex justify-between items-center mb-4 md:mb-6">
-        <span className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">{match.stage}</span>
-        {match.status === 'Live' ? (
-          <div className="flex items-center gap-1.5 bg-rose-50 px-2 py-1 rounded-full border border-rose-100 shadow-sm shadow-rose-100/50">
-            <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-ping"></span>
-            <span className="text-[8px] font-black text-rose-600 uppercase">Live</span>
+const Bracket: React.FC<BracketProps> = ({ matches, onSelectWinner }) => {
+  const leagueMatches = matches.filter(m => m.stage === 'League');
+  const eliminatorMatches = matches.filter(m => m.stage === 'Eliminator' || m.stage === 'Qualifier');
+  const finalMatch = matches.find(m => m.stage === 'Final');
+  const getStatusBadge = (status: Match['status']) => {
+    switch (status) {
+      case 'Live':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-500 text-white animate-pulse">
+            <span className="w-2 h-2 rounded-full bg-white live-pulse"></span>
+            LIVE
+          </span>
+        );
+      case 'Completed':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+            <Trophy className="w-3 h-3" />
+            COMPLETED
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-muted text-muted-foreground">
+            PENDING
+          </span>
+        );
+    }
+  };
+  const MatchCard: React.FC<{ match: Match; highlight?: boolean }> = ({ match, highlight }) => {
+    const prediction = match.prediction;
+    const team1Prob = prediction ? Math.round(prediction.team1WinProb * 100) : 50;
+    const team2Prob = 100 - team1Prob;
+    return (
+      <div
+        className={cn(
+          "match-card glass-card rounded-2xl p-5 transition-all duration-300",
+          highlight && "gradient-border",
+          match.status === 'Live' && "ring-2 ring-red-500 ring-offset-2"
+        )}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            {match.stage} {match.matchNumber && `• Match ${match.matchNumber}`}
+          </span>
+          {getStatusBadge(match.status)}
+        </div>
+        {/* Teams */}
+        <div className="space-y-3">
+          {/* Team 1 */}
+          <div 
+            className={cn(
+              "flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer hover:bg-muted/50",
+              match.winner === match.team1 && "bg-green-50 border border-green-200"
+            )}
+            onClick={() => match.status !== 'Completed' && onSelectWinner?.(match.id, match.team1)}
+          >
+            <img 
+              src={TEAM_LOGOS[match.team1]} 
+              alt={match.team1}
+              className="w-12 h-12 rounded-full object-cover border-2 shadow-md"
+              style={{ borderColor: TEAM_COLORS[match.team1].primary }}
+            />
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-foreground truncate">{match.team1}</p>
+              {match.score1 && (
+                <p className="text-sm text-muted-foreground font-mono">{match.score1}</p>
+              )}
+            </div>
+            {match.winner === match.team1 && (
+              <Trophy className="w-5 h-5 text-green-500" />
+            )}
+            {prediction && match.status !== 'Completed' && (
+              <span className={cn(
+                "text-sm font-bold px-2 py-1 rounded-md",
+                team1Prob > 50 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+              )}>
+                {team1Prob}%
+              </span>
+            )}
           </div>
-        ) : match.status === 'Upcoming' ? (
-          <div className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
-            <i className="fas fa-clock text-[7px] text-slate-400"></i>
-            <span className="text-[8px] font-black text-slate-500 uppercase">Pending</span>
+          {/* VS Divider */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-border"></div>
+            <span className="text-xs font-bold text-muted-foreground">VS</span>
+            <div className="flex-1 h-px bg-border"></div>
           </div>
-        ) : (
-          <div className="flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
-            <i className="fas fa-check-circle text-[7px] text-emerald-500"></i>
-            <span className="text-[8px] font-black text-emerald-600 uppercase">Final</span>
+          {/* Team 2 */}
+          <div 
+            className={cn(
+              "flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer hover:bg-muted/50",
+              match.winner === match.team2 && "bg-green-50 border border-green-200"
+            )}
+            onClick={() => match.status !== 'Completed' && onSelectWinner?.(match.id, match.team2)}
+          >
+            <img 
+              src={TEAM_LOGOS[match.team2]} 
+              alt={match.team2}
+              className="w-12 h-12 rounded-full object-cover border-2 shadow-md"
+              style={{ borderColor: TEAM_COLORS[match.team2].primary }}
+            />
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-foreground truncate">{match.team2}</p>
+              {match.score2 && (
+                <p className="text-sm text-muted-foreground font-mono">{match.score2}</p>
+              )}
+            </div>
+            {match.winner === match.team2 && (
+              <Trophy className="w-5 h-5 text-green-500" />
+            )}
+            {prediction && match.status !== 'Completed' && (
+              <span className={cn(
+                "text-sm font-bold px-2 py-1 rounded-md",
+                team2Prob > 50 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+              )}>
+                {team2Prob}%
+              </span>
+            )}
+          </div>
+        </div>
+        {/* Prediction Bar */}
+        {prediction && match.status !== 'Completed' && (
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center justify-between text-xs font-medium">
+              <span className="text-muted-foreground">Oracle Prediction</span>
+              <span className={cn(
+                "font-bold",
+                prediction.confidence === 'High' ? "text-green-600" :
+                prediction.confidence === 'Medium' ? "text-amber-600" : "text-muted-foreground"
+              )}>
+                {prediction.confidence} Confidence
+              </span>
+            </div>
+            <div className="relative h-3 rounded-full overflow-hidden bg-muted">
+              <div 
+                className="absolute left-0 top-0 h-full rounded-full wpl-gradient transition-all duration-500"
+                style={{ width: `${team1Prob}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
+        {/* Player of the Match Prediction */}
+        {prediction?.predictedPOTM && match.status !== 'Completed' && (
+          <div className="mt-4 p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200">
+            <div className="flex items-center gap-2 mb-1">
+              <Star className="w-4 h-4 text-amber-500" />
+              <span className="text-xs font-semibold text-amber-700">Predicted POTM</span>
+            </div>
+            <p className="text-sm font-bold text-amber-900">
+              {prediction.predictedPOTM.player.name}
+            </p>
+            <p className="text-xs text-amber-600 mt-0.5">
+              {prediction.predictedPOTM.reasoning}
+            </p>
+          </div>
+        )}
+        {/* Match Details */}
+        {(match.venue || match.date) && (
+          <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+            {match.venue && <span>📍 {match.venue}</span>}
+            {match.time && <span>🕐 {match.time}</span>}
           </div>
         )}
       </div>
-      
-      <div className="space-y-3 md:space-y-4">
-        {[match.team1, match.team2].map((team, idx) => {
-          const isWinner = match.winner === team;
-          const isT1 = idx === 0;
-          const scoreValue = isT1 ? match.score1 : match.score2;
-          
-          return (
-            <div key={team} className={`flex items-center justify-between transition-all ${
-              match.winner && !isWinner ? 'opacity-30 grayscale' : 'opacity-100'
-            }`}>
-              <div className="flex items-center gap-2 md:gap-3 overflow-hidden">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-white flex items-center justify-center border border-slate-100 shadow-sm flex-shrink-0">
-                  <img src={TEAM_LOGOS[team]} alt={team} className="w-6 h-6 md:w-7 md:h-7 object-contain" />
-                </div>
-                <span className={`text-[11px] md:text-sm font-bold truncate ${isWinner ? 'text-indigo-600' : 'text-slate-700'}`}>{team}</span>
-              </div>
-              <span className={`text-[9px] md:text-xs mono-tech font-bold ml-2 ${
-                scoreValue === 'YET TO BAT' ? 'text-slate-300 italic' : 'text-slate-500'
-              }`}>
-                {scoreValue || '--'}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {match.prediction && match.status !== 'Completed' && (
-        <div className="mt-4 md:mt-6 pt-4 md:pt-5 border-t border-slate-100">
-          <div className="flex justify-between text-[8px] md:text-[9px] mb-2 px-1">
-            <span className="text-slate-400 font-bold uppercase tracking-tighter">Oracle Prob.</span>
-            <span className="text-indigo-500 font-bold">{(match.prediction.team1WinProb * 100).toFixed(0)}% Edge</span>
-          </div>
-          <div className="w-full bg-slate-100 h-1 md:h-1.5 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000" 
-              style={{ width: `${match.prediction.team1WinProb * 100}%` }}
-            ></div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const PhaseHeader: React.FC<{ label: string, match?: Match }> = ({ label, match }) => {
-  const isLive = match?.status === 'Live';
-  const isCompleted = match?.status === 'Completed';
-
+    );
+  };
   return (
-    <div className="text-center mb-2">
-      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border transition-all ${
-        isLive ? 'bg-rose-50 border-rose-100 text-rose-600 animate-pulse' : 
-        isCompleted ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
-        'bg-indigo-50/30 border-indigo-100/50 text-indigo-400'
-      }`}>
-        <p className="text-[9px] font-black uppercase tracking-widest leading-none">
-          {label} {isLive ? '• LIVE' : isCompleted ? '• FINAL' : ''}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-const Bracket: React.FC<BracketProps> = ({ matches }) => {
-  const m1 = matches.find(m => m.id === 'm1');
-  const m2 = matches.find(m => m.id === 'm2');
-  const m3 = matches.find(m => m.id === 'm3');
-
-  return (
-    <div className="overflow-x-auto pb-6 -mx-4 px-4 scrollbar-hide snap-x">
-      <div className="flex items-center gap-6 md:gap-12 min-w-max p-2 py-8">
-        {/* Phase 1 */}
-        <div className="flex flex-col gap-4 md:gap-6 snap-center">
-          <PhaseHeader label="Phase 1" match={m1} />
-          {m1 && <MatchNode match={m1} />}
+    <div className="space-y-6">
+      {/* Phase Headers */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* League Phase */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-primary" />
+            <h3 className="font-bold text-lg">League Stage</h3>
+            {leagueMatches.some(m => m.status === 'Live') && (
+              <span className="text-xs font-bold text-red-500 animate-pulse">• LIVE</span>
+            )}
+          </div>
+          {leagueMatches.slice(0, 3).map(match => (
+            <MatchCard key={match.id} match={match} />
+          ))}
         </div>
-
-        {/* Separator */}
-        <div className="w-8 md:w-12 h-0.5 bg-slate-200/50 relative flex-shrink-0">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+        {/* Playoffs */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-secondary" />
+            <h3 className="font-bold text-lg">Playoffs</h3>
+          </div>
+          {eliminatorMatches.map(match => (
+            <MatchCard key={match.id} match={match} />
+          ))}
         </div>
-
-        {/* Phase 2 */}
-        <div className="flex flex-col gap-4 md:gap-6 snap-center">
-          <PhaseHeader label="Phase 2" match={m2} />
-          {m2 && <MatchNode match={m2} />}
-        </div>
-
-        {/* Separator */}
-        <div className="w-8 md:w-12 h-0.5 bg-slate-200/50 relative flex-shrink-0">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-slate-300"></div>
-        </div>
-
-        {/* Phase 3 */}
-        <div className="flex flex-col gap-4 md:gap-6 snap-center">
-          <PhaseHeader label="Phase 3" match={m3} />
-          {m3 && (
-            <div className="relative">
-              <MatchNode match={m3} />
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2">
-                 <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border-4 border-amber-200 shadow-xl icon-pulse">
-                    <i className="fas fa-trophy text-xl text-amber-500"></i>
-                 </div>
-              </div>
-            </div>
-          )}
+        {/* Final */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-accent" />
+            <h3 className="font-bold text-lg">Grand Final</h3>
+          </div>
+          {finalMatch && <MatchCard match={finalMatch} highlight />}
         </div>
       </div>
     </div>
   );
 };
-
-export default Bracket;
