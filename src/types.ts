@@ -1,4 +1,3 @@
-
 export enum TeamName {
   DC = 'Delhi Capitals',
   UPW = 'UP Warriorz',
@@ -6,13 +5,14 @@ export enum TeamName {
   RCB = 'Royal Challengers Bangalore',
   MI = 'Mumbai Indians'
 }
-
 export interface PlayerStats {
   name: string;
   role: 'Batter' | 'Bowler' | 'All-rounder' | 'WK';
   recentFormIndex: number; // 0-1
+  impactScore?: number; // Overall impact in recent matches
+  strikeRate?: number;
+  economy?: number;
 }
-
 export interface TeamStats {
   name: TeamName;
   played: number;
@@ -24,8 +24,9 @@ export interface TeamStats {
   recentForm: ('W' | 'L')[];
   powerplay_performance: number;
   death_bowling_strength: number;
+  homeAdvantage?: number;
+  clutchFactor?: number; // Performance in pressure situations
 }
-
 export interface LiveMetrics {
   runsNeeded: number;
   ballsLeft: number;
@@ -34,15 +35,37 @@ export interface LiveMetrics {
   requiredRR: number;
   target: number;
   isNightMatch: boolean;
-  humidityLevel: number; // 0-100
-  dewLikelihood: number; // 0-1
-  // Added scoreString to fix property access errors in LiveMatchTracker.tsx
+  humidityLevel: number;
+  dewLikelihood: number;
   scoreString?: string;
+  partnership?: number;
+  lastFiveOvers?: string;
 }
-
+export interface PredictedPOTM {
+  player: PlayerStats;
+  team: TeamName;
+  probability: number;
+  reasoning: string;
+}
+export interface MatchPrediction {
+  team1WinProb: number;
+  team2WinProb: number;
+  confidence: 'High' | 'Medium' | 'Lean' | 'Toss-up';
+  factors: string[];
+  xiStrengthIndex?: { t1: number; t2: number };
+  dewImpact?: number;
+  ensembleMetrics?: {
+    momentum_score: number;
+    pressure_index: number;
+    gradient_boost_score: number;
+  };
+  predictedPOTM?: PredictedPOTM;
+  modelAccuracy?: number;
+}
 export interface Match {
   id: string;
-  stage: 'League' | 'Eliminator' | 'Final';
+  matchNumber?: number;
+  stage: 'League' | 'Eliminator' | 'Qualifier' | 'Final';
   team1: TeamName;
   team2: TeamName;
   status: 'Upcoming' | 'Live' | 'Completed';
@@ -52,34 +75,31 @@ export interface Match {
   summary?: string;
   playerOfTheMatch?: string;
   liveMetrics?: LiveMetrics;
-  historicalH2H?: string; 
+  historicalH2H?: string;
   venue?: string;
+  date?: string;
+  time?: string;
   playingXI?: {
     team1: PlayerStats[];
     team2: PlayerStats[];
   };
-  prediction?: {
-    team1WinProb: number;
-    team2WinProb: number;
-    confidence: 'High' | 'Medium' | 'Lean' | 'Toss-up';
-    factors: string[];
-    xiStrengthIndex?: { t1: number, t2: number };
-    dewImpact?: number;
-    ensembleMetrics?: {
-      momentum_score: number;
-      pressure_index: number;
-    predictedPOTM?: string;
-    };
-  };
+  prediction?: MatchPrediction;
 }
-
 export interface TournamentState {
   standings: TeamStats[];
   matches: Match[];
   lastUpdated: string;
   predictedChampion: TeamName | null;
   confidenceScore: number;
-  volatilityIndex: number; 
-  // Added to store URLs from Google Search grounding
-  searchSources?: { title?: string, uri?: string }[];
+  volatilityIndex: number;
+  overallAccuracy: number;
+  searchSources?: { title?: string; uri?: string }[];
+}
+export interface AccuracyMetrics {
+  totalPredictions: number;
+  correctPredictions: number;
+  matchWinnerAccuracy: number;
+  playoffAccuracy: number;
+  potmAccuracy: number;
+  modelVersion: string;
 }
