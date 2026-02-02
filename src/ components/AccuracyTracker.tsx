@@ -1,61 +1,89 @@
-
 import React from 'react';
 
 const AccuracyTracker: React.FC = () => {
-  const historicalData = [
-    { season: 'S1', accuracy: 78, knockouts: '2/3' },
-    { season: 'S2', accuracy: 84, knockouts: '3/3' },
-    { season: 'S3', accuracy: 81, knockouts: '2/3' },
-  ];
+  // Static data - could be enhanced with actual tracking later
+  const stats = {
+    totalPredictions: 47,
+    correctPredictions: 38,
+    accuracy: 80.85,
+    lastUpdated: '2 hours ago'
+  };
 
   return (
-    <div className="ai-card rounded-[2rem] p-7 shadow-sm border border-white/60 animate-in fade-in slide-in-from-right-4 duration-700">
+    <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
-            <i className="fas fa-bullseye text-xs"></i>
-          </div>
-          <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Oracle Accuracy</h3>
+        <h2 className="text-xl font-bold">Prediction Accuracy</h2>
+        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      </div>
+
+      {/* Main Accuracy Display */}
+      <div className="text-center mb-8">
+        <div className="text-6xl font-bold mb-2">
+          {stats.accuracy.toFixed(1)}%
         </div>
-        <div className="px-2 py-1 bg-emerald-500 rounded text-[9px] font-black text-white uppercase tracking-tighter">
-          81% AVG
+        <div className="text-purple-100 text-sm">
+          Overall Prediction Accuracy
         </div>
       </div>
 
-      <div className="space-y-6">
-        <div className="flex justify-between items-end">
-          <div>
-            <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Total Hits (S1-S3)</p>
-            <span className="text-2xl font-black text-slate-800 mono-tech">54/66</span>
-          </div>
-          <div className="text-right">
-            <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Knockout Rate</p>
-            <span className="text-sm font-black text-indigo-600">89% CERTAINTY</span>
-          </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold mb-1">{stats.totalPredictions}</div>
+          <div className="text-purple-100 text-xs uppercase tracking-wide">Total Predictions</div>
         </div>
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold mb-1">{stats.correctPredictions}</div>
+          <div className="text-purple-100 text-xs uppercase tracking-wide">Correct Calls</div>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-3 gap-2">
-          {historicalData.map((item) => (
-            <div key={item.season} className="p-3 bg-white/50 rounded-xl border border-slate-100 hover:border-emerald-200 transition-colors group">
-              <span className="text-[9px] font-black text-slate-400 uppercase block mb-2">{item.season}</span>
-              <div className="flex flex-col">
-                <span className="text-xs font-black text-slate-700">{item.accuracy}%</span>
-                <span className="text-[8px] font-bold text-slate-400">KO: {item.knockouts}</span>
-              </div>
-              <div className="mt-2 w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-emerald-400 group-hover:bg-emerald-500 transition-all" 
-                  style={{ width: `${item.accuracy}%` }}
-                ></div>
-              </div>
+      {/* Progress Bar */}
+      <div className="mb-4">
+        <div className="flex justify-between text-sm mb-2">
+          <span className="text-purple-100">Accuracy Rate</span>
+          <span className="font-medium">{stats.accuracy.toFixed(1)}%</span>
+        </div>
+        <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
+          <div
+            className="h-full bg-white rounded-full transition-all duration-500"
+            style={{ width: `${stats.accuracy}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Last Updated */}
+      <div className="text-center text-purple-100 text-xs">
+        Last updated {stats.lastUpdated}
+      </div>
+
+      {/* Performance Breakdown */}
+      <div className="mt-6 pt-6 border-t border-white/20">
+        <h3 className="font-semibold mb-3 text-sm">Performance Breakdown</h3>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span className="text-purple-100">Match Winner</span>
             </div>
-          ))}
-        </div>
-
-        <div className="pt-4 border-t border-slate-200/50">
-          <p className="text-[10px] text-slate-500 leading-tight italic">
-            "Season 4 weights have been adjusted by +4.2% following the S3 Eliminator variance report."
-          </p>
+            <span className="font-bold">82%</span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <span className="text-purple-100">Playoff Qualification</span>
+            </div>
+            <span className="font-bold">78%</span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+              <span className="text-purple-100">Tournament Winner</span>
+            </div>
+            <span className="font-bold">85%</span>
+          </div>
         </div>
       </div>
     </div>
