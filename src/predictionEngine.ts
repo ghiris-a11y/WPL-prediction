@@ -1,12 +1,8 @@
-import { TeamName, TeamStats, Match, PlayerStats, PredictedPOTM, MatchPrediction } from './types';
+import { TeamName, TeamStats, Match, PlayerStats, PredictedPOTM } from './types';
 import { VENUE_DATA } from './constants';
 
 // Enhanced ML-inspired prediction engine with Gradient Boosting approach
 const DEW_PENALTY_LOGIT = 0.45;
-const MOMENTUM_WEIGHT = 0.25;
-const ELO_WEIGHT = 0.20;
-const FORM_WEIGHT = 0.30;
-const CLUTCH_WEIGHT = 0.25;
 
 /**
  * Calculate XI Strength using player form indices with weighted importance

@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { TeamName, TournamentState, Match } from '@/types';
+import { TeamName, TournamentState } from '@/types';
 import { INITIAL_TEAMS, INITIAL_MATCHES, MODEL_VERSION } from '@/constants';
 import { fetchLiveWPLData, updateStandingsFromAPI, updateMatchFromLive } from '@/services/cricketService';
-import { simulateTournament, calculateVolatility } from '@/services/predictionEngine';
-import Bracket from '@/ components/Bracket';
-import StandingsTable from '@/ components/StandingsTable';
-import LiveMatchTracker from '@/ components/LiveMatchTracker';
-import PredictionPanel from '@/ components/PredictionPanel';
-import ScheduleList from '@/ components/ScheduleList';
-import AccuracyTracker from '@/ components/AccuracyTracker';
-import { RefreshCw, Wifi, WifiOff, Zap, Calendar, Trophy, LayoutGrid, Sparkles } from 'lucide-react';
+import { simulateTournament, calculateVolatility } from '@/predictionEngine';
+import Bracket from '@/components/Bracket';
+import StandingsTable from '@/components/StandingsTable';
+import LiveMatchTracker from '@/components/LiveMatchTracker';
+import PredictionPanel from '@/components/PredictionPanel';
+import ScheduleList from '@/components/ScheduleList';
+import AccuracyTracker from '@/components/AccuracyTracker';
+import { RefreshCw, Wifi, WifiOff, Calendar, Trophy, LayoutGrid, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 const CACHE_KEY = 'wpl_oracle_data_v4';
 const SYNC_INTERVAL = 30000; // 30 seconds
-const WPLOracle: React.FC = () => {
+const Index: React.FC = () => {
   const [state, setState] = useState<TournamentState>(() => {
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
@@ -47,7 +47,6 @@ const WPLOracle: React.FC = () => {
   });
   const [isSyncing, setIsSyncing] = useState(false);
   const [apiStatus, setApiStatus] = useState<'online' | 'offline' | 'syncing'>('online');
-  const [nextSync, setNextSync] = useState<Date | null>(null);
   const [activeTab, setActiveTab] = useState<'bracket' | 'schedule' | 'standings' | 'simulator'>('bracket');
   const [isMobile, setIsMobile] = useState(false);
   const syncTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -93,11 +92,15 @@ const WPLOracle: React.FC = () => {
         return newState;
       });
       setApiStatus('online');
-      setNextSync(new Date(Date.now() + SYNC_INTERVAL));
     } catch (err) {
       console.error('Sync error:', err);
       setApiStatus('offline');
     } finally {
+      if (manual) {
+        setTimeout(() => {
+          setApiStatus(status => (status === 'syncing' ? 'online' : status));
+        }, 0);
+      }
       setIsSyncing(false);
     }
   }, [isSyncing]);
@@ -138,13 +141,7 @@ const WPLOracle: React.FC = () => {
     { id: 'standings', label: 'Standings', icon: Trophy },
     { id: 'simulator', label: 'Simulator', icon: Sparkles },
   ];
-const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
       {/* Header */}
       <header className="sticky top-0 z-50 glass-card border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4">

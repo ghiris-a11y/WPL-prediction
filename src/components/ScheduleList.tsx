@@ -1,5 +1,5 @@
 import React from 'react';
-import { Match, TeamName } from '@/types';
+import { Match } from '@/types';
 import { TEAM_LOGOS, TEAM_COLORS } from '@/constants';
 import { cn } from '@/lib/utils';
 import { Calendar, MapPin, Clock, Trophy, Star, ArrowRight } from 'lucide-react';

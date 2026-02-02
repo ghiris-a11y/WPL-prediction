@@ -1,5 +1,5 @@
 import React from 'react';
-import { TournamentState, TeamName } from '@/types';
+import { TournamentState } from '@/types';
 import { TEAM_LOGOS, TEAM_COLORS, MODEL_VERSION } from '@/constants';
 import { cn } from '@/lib/utils';
 import { Crown, TrendingUp, Gauge, Sparkles, Zap } from 'lucide-react';
