@@ -1,172 +1,222 @@
 import React from 'react';
-import { Match } from '../types';
-
+import { Match, TeamName } from '@/types';
+import { TEAM_LOGOS, TEAM_COLORS } from '@/constants';
+import { cn } from '@/lib/utils';
+import { Calendar, MapPin, Clock, Trophy, Star, ArrowRight } from 'lucide-react';
 interface ScheduleListProps {
   matches: Match[];
 }
-
 const ScheduleList: React.FC<ScheduleListProps> = ({ matches }) => {
-  const upcomingMatches = matches.filter(m => m.status === 'Upcoming');
-  const liveMatches = matches.filter(m => m.status === 'Live');
-  const completedMatches = matches.filter(m => m.status === 'Completed');
-
-  const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
-    const colors = {
-      Upcoming: 'bg-blue-100 text-blue-700 border-blue-200',
-      Live: 'bg-red-100 text-red-700 border-red-200',
-      Completed: 'bg-gray-100 text-gray-700 border-gray-200'
-    };
-
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-bold border ${colors[status as keyof typeof colors]}`}>
-        {status === 'Live' && <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse mr-1"></span>}
-        {status.toUpperCase()}
-      </span>
-    );
+  const sortedMatches = [...matches].sort((a, b) => {
+    // Live matches first
+    if (a.status === 'Live' && b.status !== 'Live') return -1;
+    if (b.status === 'Live' && a.status !== 'Live') return 1;
+    
+    // Then by date
+    if (a.date && b.date) {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    }
+    
+    // Then by stage importance
+    const stageOrder = { 'League': 0, 'Eliminator': 1, 'Qualifier': 2, 'Final': 3 };
+    return stageOrder[a.stage] - stageOrder[b.stage];
+  });
+  const getStatusStyles = (status: Match['status']) => {
+    switch (status) {
+      case 'Live':
+        return 'bg-red-500 text-white animate-pulse';
+      case 'Completed':
+        return 'bg-green-100 text-green-700';
+      default:
+        return 'bg-muted text-muted-foreground';
+    }
   };
-
-  const MatchCard: React.FC<{ match: Match }> = ({ match }) => (
-    <div className={`bg-white border rounded-xl p-4 hover:shadow-lg transition ${
-      match.status === 'Live' ? 'border-red-300 ring-2 ring-red-100' : 'border-slate-200'
-    }`}>
-      <div className="flex items-start justify-between mb-3">
-        <div className="text-sm text-slate-500">
-          <div className="flex items-center space-x-2">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            <span className="font-medium">{match.stage}</span>
-          </div>
-        </div>
-        <StatusBadge status={match.status} />
-      </div>
-
-      {/* Teams */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 flex-1">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center font-bold text-blue-600 text-sm shadow-sm">
-              {match.team1.substring(0, 2).toUpperCase()}
-            </div>
-            <span className={`font-semibold ${match.winner === match.team1 ? 'text-green-600' : 'text-slate-800'}`}>
-              {match.team1}
-            </span>
-          </div>
-          <div className="text-right ml-2">
-            <span className="text-lg font-bold text-slate-900">
-              {match.score1 || '-'}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center">
-          <span className="text-slate-400 font-bold text-sm">VS</span>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 flex-1">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center font-bold text-purple-600 text-sm shadow-sm">
-              {match.team2.substring(0, 2).toUpperCase()}
-            </div>
-            <span className={`font-semibold ${match.winner === match.team2 ? 'text-green-600' : 'text-slate-800'}`}>
-              {match.team2}
-            </span>
-          </div>
-          <div className="text-right ml-2">
-            <span className="text-lg font-bold text-slate-900">
-              {match.score2 || '-'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary */}
-      {match.summary && (
-        <div className="mt-3 pt-3 border-t border-slate-100">
-          <div className="text-sm text-slate-600">{match.summary}</div>
-        </div>
-      )}
-
-      {/* Winner */}
-      {match.winner && match.status === 'Completed' && (
-        <div className="mt-3 pt-3 border-t border-slate-100">
-          <div className="text-sm font-semibold text-green-600 flex items-center gap-2">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            {match.winner} won
-          </div>
-        </div>
-      )}
-
-      {/* Prediction for upcoming matches */}
-      {match.prediction && match.status === 'Upcoming' && (
-        <div className="mt-3 pt-3 border-t border-slate-100">
-          <div className="flex justify-between text-xs mb-2">
-            <span className="text-slate-500 font-medium">Win Probability</span>
-            <span className="text-purple-600 font-bold">
-              {(match.prediction.team1WinProb * 100).toFixed(0)}% - {(match.prediction.team2WinProb * 100).toFixed(0)}%
-            </span>
-          </div>
-          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
-              style={{ width: `${match.prediction.team1WinProb * 100}%` }}
-            ></div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
+  const getStageBadge = (stage: Match['stage']) => {
+    const styles: Record<string, string> = {
+      'League': 'bg-blue-100 text-blue-700',
+      'Eliminator': 'bg-amber-100 text-amber-700',
+      'Qualifier': 'bg-purple-100 text-purple-700',
+      'Final': 'bg-gradient-to-r from-amber-400 to-orange-500 text-white'
+    };
+    return styles[stage] || 'bg-muted text-muted-foreground';
+  };
   return (
-    <div className="space-y-6">
-      {/* Live Matches */}
-      {liveMatches.length > 0 && (
-        <div>
-          <h3 className="text-lg font-bold text-red-600 mb-4 flex items-center gap-2">
-            <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-            Live Matches
-          </h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            {liveMatches.map((match) => (
-              <MatchCard key={match.id} match={match} />
-            ))}
+    <div className="glass-card rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="wpl-gradient p-6">
+        <div className="flex items-center gap-3">
+          <Calendar className="w-6 h-6 text-white" />
+          <div>
+            <h2 className="text-xl font-bold text-white">Match Schedule</h2>
+            <p className="text-white/80 text-sm mt-0.5">WPL Season 4 - 2026</p>
           </div>
         </div>
-      )}
-
-      {/* Upcoming Matches */}
-      {upcomingMatches.length > 0 && (
-        <div>
-          <h3 className="text-lg font-bold text-blue-600 mb-4">Upcoming Matches</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            {upcomingMatches.map((match) => (
-              <MatchCard key={match.id} match={match} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Completed Matches */}
-      {completedMatches.length > 0 && (
-        <div>
-          <h3 className="text-lg font-bold text-slate-600 mb-4">Recent Results</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            {completedMatches.map((match) => (
-              <MatchCard key={match.id} match={match} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {matches.length === 0 && (
-        <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-          <p className="text-slate-600">No matches scheduled</p>
-        </div>
-      )}
+      </div>
+      {/* Match List */}
+      <div className="divide-y divide-border">
+        {sortedMatches.map((match) => {
+          const prediction = match.prediction;
+          const team1Prob = prediction ? Math.round(prediction.team1WinProb * 100) : 50;
+          
+          return (
+            <div 
+              key={match.id}
+              className={cn(
+                "p-4 sm:p-5 transition-colors hover:bg-muted/30",
+                match.status === 'Live' && "bg-red-50/50"
+              )}
+            >
+              <div className="flex items-start gap-4">
+                {/* Date Column */}
+                <div className="hidden sm:flex flex-col items-center justify-center w-16 text-center">
+                  {match.date ? (
+                    <>
+                      <span className="text-2xl font-bold text-foreground stat-number">
+                        {new Date(match.date).getDate()}
+                      </span>
+                      <span className="text-xs text-muted-foreground uppercase">
+                        {new Date(match.date).toLocaleDateString('en-US', { month: 'short' })}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">TBD</span>
+                  )}
+                </div>
+                {/* Main Content */}
+                <div className="flex-1 min-w-0">
+                  {/* Status Badges */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className={cn(
+                      "px-2.5 py-1 rounded-full text-xs font-bold",
+                      getStageBadge(match.stage)
+                    )}>
+                      {match.stage}
+                    </span>
+                    <span className={cn(
+                      "px-2.5 py-1 rounded-full text-xs font-semibold",
+                      getStatusStyles(match.status)
+                    )}>
+                      {match.status === 'Live' && '🔴 '}{match.status}
+                    </span>
+                    {match.matchNumber && (
+                      <span className="text-xs text-muted-foreground">
+                        Match #{match.matchNumber}
+                      </span>
+                    )}
+                  </div>
+                  {/* Teams Row */}
+                  <div className="flex items-center gap-3">
+                    {/* Team 1 */}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <img 
+                        src={TEAM_LOGOS[match.team1]} 
+                        alt={match.team1}
+                        className="w-10 h-10 rounded-full object-cover border-2 shadow-sm flex-shrink-0"
+                        style={{ borderColor: TEAM_COLORS[match.team1].primary }}
+                      />
+                      <div className="min-w-0">
+                        <p className={cn(
+                          "font-bold truncate",
+                          match.winner === match.team1 && "text-green-600"
+                        )}>
+                          {match.team1.split(' ').slice(-2).join(' ')}
+                        </p>
+                        {match.score1 && (
+                          <p className="text-xs text-muted-foreground font-mono">{match.score1}</p>
+                        )}
+                      </div>
+                      {match.winner === match.team1 && (
+                        <Trophy className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      )}
+                    </div>
+                    {/* VS / Prediction */}
+                    <div className="flex flex-col items-center px-4">
+                      {prediction && match.status !== 'Completed' ? (
+                        <div className="text-center">
+                          <span className="text-lg font-bold wpl-gradient-text stat-number">
+                            {team1Prob}%
+                          </span>
+                          <p className="text-[10px] text-muted-foreground">vs {100 - team1Prob}%</p>
+                        </div>
+                      ) : (
+                        <span className="text-sm font-bold text-muted-foreground">VS</span>
+                      )}
+                    </div>
+                    {/* Team 2 */}
+                    <div className="flex items-center gap-2 flex-1 min-w-0 justify-end text-right">
+                      {match.winner === match.team2 && (
+                        <Trophy className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      )}
+                      <div className="min-w-0">
+                        <p className={cn(
+                          "font-bold truncate",
+                          match.winner === match.team2 && "text-green-600"
+                        )}>
+                          {match.team2.split(' ').slice(-2).join(' ')}
+                        </p>
+                        {match.score2 && (
+                          <p className="text-xs text-muted-foreground font-mono">{match.score2}</p>
+                        )}
+                      </div>
+                      <img 
+                        src={TEAM_LOGOS[match.team2]} 
+                        alt={match.team2}
+                        className="w-10 h-10 rounded-full object-cover border-2 shadow-sm flex-shrink-0"
+                        style={{ borderColor: TEAM_COLORS[match.team2].primary }}
+                      />
+                    </div>
+                  </div>
+                  {/* POTM and Summary */}
+                  {match.playerOfTheMatch && (
+                    <div className="mt-3 flex items-center gap-2 text-sm">
+                      <Star className="w-4 h-4 text-amber-500" />
+                      <span className="text-muted-foreground">POTM:</span>
+                      <span className="font-semibold text-foreground">{match.playerOfTheMatch}</span>
+                    </div>
+                  )}
+                  {prediction?.predictedPOTM && match.status !== 'Completed' && (
+                    <div className="mt-3 flex items-center gap-2 text-sm">
+                      <Star className="w-4 h-4 text-amber-400" />
+                      <span className="text-muted-foreground">Predicted POTM:</span>
+                      <span className="font-semibold text-amber-600">
+                        {prediction.predictedPOTM.player.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        ({(prediction.predictedPOTM.probability * 100).toFixed(0)}%)
+                      </span>
+                    </div>
+                  )}
+                  {match.summary && (
+                    <p className="mt-2 text-sm text-muted-foreground">{match.summary}</p>
+                  )}
+                  {/* Meta Info */}
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                    {match.venue && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {match.venue}
+                      </span>
+                    )}
+                    {match.time && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {match.time}
+                      </span>
+                    )}
+                    {match.historicalH2H && (
+                      <span className="flex items-center gap-1">
+                        <ArrowRight className="w-3 h-3" />
+                        H2H: {match.historicalH2H}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
-
 export default ScheduleList;
