@@ -1,8 +1,7 @@
 import React from 'react';
 import { AccuracyMetrics } from '@/types';
 import { MODEL_VERSION } from '@/constants';
-import { cn } from '@/lib/utils';
-import { Target, TrendingUp, Award, Zap, Star, BarChart3 } from 'lucide-react';
+import { TrendingUp, Award, Zap, Star, BarChart3 } from 'lucide-react';
 interface AccuracyTrackerProps {
   metrics?: AccuracyMetrics;
 }

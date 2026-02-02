@@ -1,5 +1,5 @@
 // Robust Cricket Service - API first with hardcoded WPL 2026 schedule fallback
-import { TeamName } from '../types';
+import { TeamName, TeamStats, Match, LiveMetrics } from '../types';
 
 const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY || '';
 const RAPIDAPI_HOST = 'cricbuzz-cricket.p.rapidapi.com';
@@ -372,4 +372,60 @@ export default cricketService;
 // Export named function for compatibility
 export async function fetchLiveWPLData(): Promise<CricketDataResponse> {
   return cricketService.fetchLiveWPLData();
+}
+
+export function updateStandingsFromAPI(current: TeamStats[], apiTeams?: any[]): TeamStats[] {
+  if (!apiTeams || apiTeams.length === 0) return current;
+
+  return current.map(team => {
+    const apiTeam = apiTeams.find((t: any) =>
+      t.name?.toLowerCase?.().includes(team.name.toLowerCase()) ||
+      team.name.toLowerCase().includes(String(t.name || '').toLowerCase())
+    );
+
+    if (!apiTeam) return team;
+
+    return {
+      ...team,
+      points: apiTeam.points ?? team.points,
+      nrr: apiTeam.nrr ?? team.nrr,
+      played: apiTeam.played ?? team.played,
+      won: apiTeam.won ?? team.won,
+      lost: apiTeam.lost ?? team.lost
+    };
+  });
+}
+
+export function updateMatchFromLive(matches: Match[], liveMatch?: CricketDataResponse['liveMatch']): Match[] {
+  if (!liveMatch?.isLive) return matches;
+
+  return matches.map(match => {
+    const isThisMatch =
+      liveMatch.team1.toLowerCase().includes(match.team1.toLowerCase()) ||
+      liveMatch.team2.toLowerCase().includes(match.team1.toLowerCase()) ||
+      match.status === 'Live';
+
+    if (!isThisMatch) return match;
+
+    const liveMetrics: LiveMetrics = {
+      target: liveMatch.target ?? 0,
+      scoreString: liveMatch.score,
+      isNightMatch: liveMatch.isNight,
+      humidityLevel: liveMatch.humidity,
+      runsNeeded: 0,
+      ballsLeft: 0,
+      wicketsLost: 0,
+      currentRR: 0,
+      requiredRR: 0,
+      dewLikelihood: 0.7
+    };
+
+    return {
+      ...match,
+      status: 'Live',
+      score1: liveMatch.score,
+      summary: liveMatch.summary,
+      liveMetrics
+    };
+  });
 }
