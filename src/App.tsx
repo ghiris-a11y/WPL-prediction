@@ -5,12 +5,12 @@ import { fetchLiveWPLData } from './services/cricketService';
 import { simulateTournament, calculateVolatility } from './predictionEngine';
 
 // ✅ FIXED IMPORTS: Removed space in path, using Named Imports
-import {Bracket} from './components/Bracket'; 
-import {StandingsTable} from './components/StandingsTable';
-import {LiveMatchTracker} from './components/LiveMatchTracker';
-import {PredictionPanel} from './components/PredictionPanel';
-import {AccuracyTracker} from './components/AccuracyTracker';
-import {ScheduleList} from './components/ScheduleList';
+import Bracket from './components/Bracket'; 
+import StandingsTable from './components/StandingsTable';
+import LiveMatchTracker from './components/LiveMatchTracker';
+import PredictionPanel from './components/PredictionPanel';
+import AccuracyTracker from './components/AccuracyTracker';
+import ScheduleList from './components/ScheduleList';
 
 const CACHE_KEY = 'wpl_oracle_data_v3';
 const SYNC_INTERVAL = 30000; 
