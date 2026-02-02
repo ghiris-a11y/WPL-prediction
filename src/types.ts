@@ -50,6 +50,7 @@ export interface Match {
   score1?: string;
   score2?: string;
   summary?: string;
+  playerOfTheMatch?: string;
   liveMetrics?: LiveMetrics;
   historicalH2H?: string; 
   venue?: string;
@@ -76,6 +77,7 @@ export interface TournamentState {
   matches: Match[];
   lastUpdated: string;
   predictedChampion: TeamName | null;
+  predictedPOTM?: string;
   confidenceScore: number;
   volatilityIndex: number; 
   // Added to store URLs from Google Search grounding
