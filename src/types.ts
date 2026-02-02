@@ -68,6 +68,7 @@ export interface Match {
     ensembleMetrics?: {
       momentum_score: number;
       pressure_index: number;
+    predictedPOTM?: string;
     };
   };
 }
@@ -77,7 +78,6 @@ export interface TournamentState {
   matches: Match[];
   lastUpdated: string;
   predictedChampion: TeamName | null;
-  predictedPOTM?: string;
   confidenceScore: number;
   volatilityIndex: number; 
   // Added to store URLs from Google Search grounding
