@@ -3,19 +3,18 @@ import { TeamName, TeamStats, Match, TournamentState } from './types';
 import { INITIAL_TEAMS, INITIAL_MATCHES } from './constants';
 import { fetchLiveWPLData } from './services/cricketService';
 import { simulateTournament, calculateVolatility } from './predictionEngine';
-import { Bracket } from './ components/Bracket'; 
-import { StandingsTable } from './ components/StandingsTable';
-import { LiveMatchTracker } from './ components/LiveMatchTracker';
+
+// ✅ FIXED IMPORTS: Removed space in path, using Named Imports
+import { Bracket } from './components/Bracket'; 
+import { StandingsTable } from './components/StandingsTable';
+import { LiveMatchTracker } from './components/LiveMatchTracker';
+import { PredictionPanel } from './components/PredictionPanel';
+import { AccuracyTracker } from './components/AccuracyTracker';
+import { ScheduleList } from './components/ScheduleList';
 
 const CACHE_KEY = 'wpl_oracle_data_v3';
-const SYNC_INTERVAL = 30000; // 30 seconds for faster updates
+const SYNC_INTERVAL = 30000; 
 const COOLDOWN_PERIOD = 5000;
-
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
 
 const App: React.FC = () => {
   const [state, setState] = useState<TournamentState>(() => {
@@ -23,7 +22,6 @@ const App: React.FC = () => {
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
-        // Validate cache age (max 2 minutes)
         const cacheAge = Date.now() - new Date(parsed.timestamp || 0).getTime();
         if (cacheAge < 120000) {
           return parsed;
@@ -51,7 +49,6 @@ const App: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const syncTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Detect mobile on mount and resize
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -90,9 +87,14 @@ const App: React.FC = () => {
           });
         }
 
+        // Fix: Ensure result.matches is used if available (Crucial for correct schedule)
+        if (result.matches && result.matches.length > 0) {
+             updatedMatches = result.matches;
+        }
+
         if (result.liveMatch?.isLive) {
           const liveData = result.liveMatch;
-          updatedMatches = prev.matches.map(match => {
+          updatedMatches = updatedMatches.map(match => {
             const isThisMatch = 
               liveData.team1.toLowerCase().includes(match.team1.toLowerCase()) ||
               liveData.team2.toLowerCase().includes(match.team1.toLowerCase());
@@ -108,7 +110,7 @@ const App: React.FC = () => {
                   scoreString: liveData.score,
                   isNightMatch: liveData.isNight,
                   humidityLevel: liveData.humidity,
-                  runsNeeded: 0, // Calculate from score
+                  runsNeeded: 0,
                   ballsLeft: 0,
                   wicketsLost: 0,
                   currentRR: 0,
@@ -122,7 +124,7 @@ const App: React.FC = () => {
         }
 
         const finalMatches = simulateTournament(updatedStandings, updatedMatches);
-        const finalMatch = finalMatches.find(m => m.id === 'm3');
+        const finalMatch = finalMatches.find(m => m.stage === 'Final');
         const predictedChamp = finalMatch?.prediction 
           ? (finalMatch.prediction.team1WinProb > 0.5 ? finalMatch.team1 : finalMatch.team2) 
           : TeamName.RCB;
@@ -175,7 +177,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen pb-10 bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Mobile-optimized header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md px-3 sm:px-6 py-3 sm:py-4 flex justify-between items-center border-b border-slate-200 shadow-lg">
         <div className="flex items-center gap-2 sm:gap-4">
           <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-lg ${
@@ -208,9 +209,7 @@ const App: React.FC = () => {
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 mt-4 sm:mt-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8">
-          {/* Main content - full width on mobile */}
           <div className="lg:col-span-8 space-y-4 sm:space-y-6">
-            {/* Mobile-friendly tab navigation */}
             <div className="flex gap-2 p-1.5 bg-white rounded-xl shadow-md overflow-x-auto">
               {['bracket', 'schedule', 'standings', 'simulator'].map(tab => (
                 <button 
@@ -227,7 +226,6 @@ const App: React.FC = () => {
               ))}
             </div>
 
-            {/* Content panels */}
             <div className="transition-all">
               {activeTab === 'bracket' && <Bracket matches={state.matches} onSelectWinner={handleManualWinner} />}
               {activeTab === 'schedule' && <ScheduleList matches={state.matches} />}
@@ -235,18 +233,16 @@ const App: React.FC = () => {
               {activeTab === 'simulator' && (
                 <div className="p-6 sm:p-8 bg-white rounded-2xl shadow-lg">
                   <h3 className="text-lg font-bold text-slate-800 mb-4">Simulation Lab</h3>
-                  <p className="text-sm text-slate-600">Advanced prediction engine active</p>
+                  <p className="text-sm text-slate-600">Advanced prediction engine active. Adjust variables to simulate new outcomes.</p>
                 </div>
               )}
             </div>
 
-            {/* Live match tracker */}
             <LiveMatchTracker 
               currentMatch={state.matches.find(m => m.status === 'Live') || state.matches[0]} 
             />
           </div>
 
-          {/* Sidebar - stack below on mobile */}
           <div className="lg:col-span-4 space-y-4 sm:space-y-6">
             <PredictionPanel state={state} />
             <AccuracyTracker />
