@@ -1,4 +1,4 @@
-# WPL Playoff Oracle - 
+# WPL Playoff Oracle 
 A real-time Women's Premier League playoff prediction app with mobile-optimized UI and fast data synchronization.
 
 ## 🚀 Key Improvements
