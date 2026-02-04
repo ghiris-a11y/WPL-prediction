@@ -1,21 +1,13 @@
-# WPL Playoff Oracle - Fixed Version 🏏
-
+# WPL Playoff Oracle - 
 A real-time Women's Premier League playoff prediction app with mobile-optimized UI and fast data synchronization.
 
 ## 🚀 Key Improvements
 
-### 1. **Fixed Live Data Updates**
+### 1. ** Live Data Updates**
 - ✅ Switched from Gemini API to Cricbuzz/RapidAPI for reliable cricket data
 - ✅ 30-second sync interval (down from 45s) for faster updates
 - ✅ Fallback data mechanism when API is unavailable
 - ✅ Better error handling and retry logic
-
-### 2. **Mobile-Responsive Design**
-- ✅ Touch-friendly buttons (44px minimum touch target)
-- ✅ Responsive layouts that work on all screen sizes
-- ✅ Optimized font sizes for mobile readability
-- ✅ Horizontal scroll for tables on small screens
-- ✅ Sticky header with compact mobile view
 
 ### 3. **Performance Optimizations**
 - ✅ Lazy loading of components
@@ -25,43 +17,7 @@ A real-time Women's Premier League playoff prediction app with mobile-optimized 
 
 ## 📦 Deployment Options
 
-### Option 1: Railway (Recommended for Containers)
-
-1. **Push to GitHub:**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git remote add origin YOUR_GITHUB_REPO_URL
-   git push -u origin main
-   ```
-
-2. **Deploy on Railway:**
-   - Go to [railway.app](https://railway.app)
-   - Click "New Project" → "Deploy from GitHub repo"
-   - Select your repository
-   - Railway will auto-detect the configuration from `railway.toml`
-   - Add environment variable: `VITE_RAPIDAPI_KEY=your_key`
-   - Deploy!
-
-### Option 2: Vercel (Fastest Deployment)
-
-1. **Install Vercel CLI:**
-   ```bash
-   npm i -g vercel
-   ```
-
-2. **Deploy:**
-   ```bash
-   cd wpl-oracle-fixed
-   vercel
-   ```
-
-3. **Add Environment Variables in Vercel Dashboard:**
-   - Go to your project settings
-   - Add `VITE_RAPIDAPI_KEY`
-
-### Option 3: Netlify
+### : Netlify
 
 1. **Push to GitHub (same as above)**
 
@@ -73,17 +29,8 @@ A real-time Women's Premier League playoff prediction app with mobile-optimized 
    - Publish directory: `dist`
    - Add environment variable: `VITE_RAPIDAPI_KEY`
 
-### Option 4: Docker (Self-hosted)
 
-```bash
-# Build the Docker image
-docker build -t wpl-oracle .
 
-# Run the container
-docker run -p 3000:3000 \
-  -e VITE_RAPIDAPI_KEY=your_key \
-  wpl-oracle
-```
 
 ## 🔑 Getting API Key
 
